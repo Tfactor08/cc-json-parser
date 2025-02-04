@@ -1,3 +1,5 @@
+"""Define nodes of the syntax tree and relations between them"""
+
 from enum import Enum
 
 class NodeType(Enum):
