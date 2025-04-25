@@ -52,7 +52,7 @@ def parse_list() -> List:
 
     while (at().ttype != TokenType.Rbracket):
         if len(content) > 0:
-            expect(TokenType.Comma, "Comma must separate list elements.")
+            expect(TokenType.Comma, "Comma must separate list elements")
         content.append(parse_expr())
     eat() # eat ']'
 
@@ -65,7 +65,7 @@ def parse_object() -> Object:
 
     while (at().ttype != TokenType.Rbrace):
         if len(attributes) > 0:
-            expect(TokenType.Comma, "Comma must separate object attributes.")
+            expect(TokenType.Comma, "Comma must separate object attributes")
         attributes.append(parse_attribute())
     eat() # eat '}'
 
@@ -99,8 +99,8 @@ def parse_literal() -> Literal:
 
 if __name__ == '__main__':
     # json = open('mock.json').read()
-    json = '[{ "1": null, \n"2": [{}] }]'
+    json = '[1, 2]'
     print(json)
     ast = produce_ast(json)
-    print(ast)
+    print(ast.content)
 
