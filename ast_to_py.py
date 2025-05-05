@@ -2,14 +2,13 @@
 
 # TODO
 # handle different types (currently everything is converted to str);
-# unhardcode __str__() generation (should loop over object's attributes);
 # handle nested objects;
 # how to name objects without a label?
 
 from _ast_ import *
 from parser import produce_ast
 
-json = '{"name": "foo", "age": 69, "some_obj": {"a": 69}}'
+json = '{"name": "foo", "age": 69, "address": {"city": "Bar", "id": 123}}'
 
 def gen_obj(obj: Object):
     assert isinstance(obj, Object), f"{obj} is not of type Object"
@@ -24,10 +23,13 @@ def gen_obj(obj: Object):
         else:
             assert isinstance(value, Literal), "We only handle Object and Literal types for now"
             py_attrs[label.strip('"')] = value.value
-    # TODO Unhardcode
-    py_attrs['__str__'] = lambda self: f"name: {self.name}, age: {self.age}, some_obj: {self.some_obj}"
-    SomeObject = type('SomeObject', (object,), py_attrs)
-    return SomeObject()
+
+    fstring = '{{' + ', '.join([f"{attr}: {{self.{attr}}}" for attr in py_attrs]) + '}}'
+    py_attrs['__str__'] = lambda self: fstring.format(self=self)
+
+    SomeObjectType = type('SomeObject', (object,), py_attrs)
+    some_object = SomeObjectType()
+    return some_object
 
 def main():
     ast = produce_ast(json)
