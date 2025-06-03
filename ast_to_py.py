@@ -1,40 +1,82 @@
 """Generate Python objects from AST"""
 
 # TODO
-# handle different types (currently everything is converted to str);
-# handle nested objects;
-# how to name objects without a label?
+# seems to be working, don't know what else to add
 
 from _ast_ import *
 from parser import produce_ast
 
-json = '{"name": "foo", "age": 69, "address": {"city": "Bar", "id": 123}}'
+#json = '{"name": "Foo", "age": 69, "status": null, "normie": false, "address": {"city": "Bar", "id": 420}}'
+json = '["fuck", "ur mom", null, 42, {"attr": "some shit"}, true, false, [1, 2]]'
+#json = '{"list": [1, 2], "nerd": false}'
 
-def gen_obj(obj: Object):
-    assert isinstance(obj, Object), f"{obj} is not of type Object"
-    attrs = {attr.label: attr.value for attr in obj.body}
+def _to_bool(value: str) -> bool:
+    return True if value == 'true' else False
+
+def gen_literal(value: Literal) -> str | int | bool | None:
+    match value.literal_type:
+        case LiteralType.Str:
+            return value.value.strip('"')
+        case LiteralType.Num:
+            return int(value.value)
+        case LiteralType.Bool:
+            return _to_bool(value.value)
+        case LiteralType.Null:
+            return None
+
+def gen_list(ast_list: List) -> list:
+    assert isinstance(ast_list, List), f"{ast_list} is not of type List"
+    py_list = list()
+    for idx, expr in enumerate(ast_list.content):
+        if isinstance(expr, Object):
+            py_list.append(gen_obj(expr, name=f"List{idx+1}Object"))
+        elif isinstance(expr, Literal):
+            py_list.append(gen_literal(expr))
+        elif isinstance(expr, List):
+            py_list.append(gen_list(expr))
+        else:
+            assert False, "Unknown expression type"
+    return py_list
+
+def gen_obj(ast_obj: Object, name='RootObject') -> object:
+    assert isinstance(ast_obj, Object), f"{ast_obj} is not of type Object"
+    attrs = {attr.label: attr.value for attr in ast_obj.body}
     py_attrs = dict()
     for label, value in attrs.items():
-        #match type(value):
-        #    case Literal:
-        #        print(value)
         if isinstance(value, Object):
             py_attrs[label.strip('"')] = gen_obj(value)
+        elif isinstance(value, Literal):
+            py_attrs[label.strip('"')] = gen_literal(value)
+        elif isinstance(value, List):
+            py_attrs[label.strip('"')] = gen_list(value)
         else:
-            assert isinstance(value, Literal), "We only handle Object and Literal types for now"
-            py_attrs[label.strip('"')] = value.value
+            assert False, "Unknown expression type"
 
     fstring = '{{' + ', '.join([f"{attr}: {{self.{attr}}}" for attr in py_attrs]) + '}}'
     py_attrs['__str__'] = lambda self: fstring.format(self=self)
 
-    SomeObjectType = type('SomeObject', (object,), py_attrs)
-    some_object = SomeObjectType()
-    return some_object
+    RootObjectType = type(name, (object,), py_attrs)
+    root_object = RootObjectType()
+    return root_object
+
+# TODO
+# no clue how to specify that object of new type is to be returned
+def ast_to_py(ast: Expr) -> list | object:
+    if isinstance(ast, Object):
+        return gen_obj(ast)
+    elif isinstance(ast, List):
+        return gen_list(ast)
+    elif isinstance(ast, Literal):
+        return gen_literal(ast)
+    else:
+        assert False, "Unknown expression type"
 
 def main():
     ast = produce_ast(json)
-    obj = gen_obj(ast)
-    print(obj)
+    py_obj = ast_to_py(ast)
+    #print('Json:\n', json)
+    #print('Ast:\n', ast)
+    print('Python obj:\n', dir(py_obj[4]))
 
 if __name__ == '__main__':
     main()
