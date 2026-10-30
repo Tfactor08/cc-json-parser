@@ -1,14 +1,7 @@
 """Generate Python objects from AST"""
 
-# TODO
-# seems to be working, don't know what else to add
-
-from _ast_ import *
-from parser import produce_ast
-
-#json = '{"name": "Foo", "age": 69, "status": null, "normie": false, "address": {"city": "Bar", "id": 420}}'
-json = '["fuck", "ur mom", null, 42, {"attr": "some shit"}, true, false, [1, 2]]'
-#json = '{"list": [1, 2], "nerd": false}'
+from ._ast import *
+from ._parser import produce_ast
 
 def _to_bool(value: str) -> bool:
     return True if value == 'true' else False
@@ -59,8 +52,7 @@ def gen_obj(ast_obj: Object, name='RootObject') -> object:
     root_object = RootObjectType()
     return root_object
 
-# TODO
-# no clue how to specify that object of new type is to be returned
+# TODO: No clue how to specify that object of new type is to be returned
 def ast_to_py(ast: Expr) -> list | object:
     if isinstance(ast, Object):
         return gen_obj(ast)
@@ -70,14 +62,4 @@ def ast_to_py(ast: Expr) -> list | object:
         return gen_literal(ast)
     else:
         assert False, "Unknown expression type"
-
-def main():
-    ast = produce_ast(json)
-    py_obj = ast_to_py(ast)
-    #print('Json:\n', json)
-    #print('Ast:\n', ast)
-    print('Python obj:\n', dir(py_obj[4]))
-
-if __name__ == '__main__':
-    main()
 

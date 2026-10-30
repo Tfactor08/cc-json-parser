@@ -2,8 +2,8 @@
 
 from typing import cast
 
-from _ast_ import *
-from lexer import *
+from ._ast import *
+from ._lexer import *
 
 tokens: list[Token] = list()
 prev: Token | None = None
@@ -54,7 +54,7 @@ def parse_list() -> List:
         if len(content) > 0:
             expect(TokenType.Comma, "Comma must separate list elements")
         content.append(parse_expr())
-    eat() # eat ']'
+    eat() # Eat ']'
 
     return _list
 
@@ -67,7 +67,7 @@ def parse_object() -> Object:
         if len(attributes) > 0:
             expect(TokenType.Comma, "Comma must separate object attributes")
         attributes.append(parse_attribute())
-    eat() # eat '}'
+    eat() # Eat '}'
 
     return _object
 
@@ -95,12 +95,4 @@ def parse_literal() -> Literal:
         case _:
             error(f"Unexpected token found during parsing: {at()}")
             exit(1)
-
-
-if __name__ == '__main__':
-    # json = open('mock.json').read()
-    json = '[1, 2]'
-    print(json)
-    ast = produce_ast(json)
-    print(ast.content)
 
