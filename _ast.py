@@ -22,7 +22,7 @@ class Expr(Stmt):
     pass
 
 class Literal(Expr):
-    def __init__(self, literal_type: LiteralType, value: int | str | None | bool):
+    def __init__(self, literal_type: LiteralType, value: str):
         super().__init__(NodeType.Literal)
         self.literal_type = literal_type
         self.value = value

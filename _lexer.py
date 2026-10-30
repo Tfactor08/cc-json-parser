@@ -68,7 +68,7 @@ class Lexer:
         non_whitespace_tokens = [t for t in self.token_list if t.ttype != TokenType.Whitespace]
         self.token_list = non_whitespace_tokens
 
-    # creates next token and advances
+    """ Create next token and advance """
     def _next_token(self) -> bool:
         if self.raw_pos >= len(self.json):
             return False
@@ -90,12 +90,4 @@ class Lexer:
 
         print(f"Lexer: unknown pattern at {self.token_pos}")
         exit(1)
-
-
-if __name__ == '__main__':
-    # json = open('mock.json').read()
-    json = '[]            {}\n []'
-    print(json)
-    for token in Lexer(json).tokenize():
-        print(token)
 
